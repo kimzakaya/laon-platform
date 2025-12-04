@@ -455,9 +455,9 @@ function updateStats(data) {
     visitChart = new Chart(visitCtx, {
         type: 'doughnut',
         data: {
-            labels: ['오늘 방문', '목표'],
+            labels: ['누적 방문자 수', ''],
             datasets: [{
-                data: [data.visitCount, Math.max(100 - data.visitCount, 0)],
+                data: [data.visitCount, Math.max(200 - data.visitCount, 0)],
                 backgroundColor: ['#3b82f6', '#e5e7eb'],
                 borderWidth: 0
             }]
@@ -483,9 +483,9 @@ function updateStats(data) {
     quoteChart = new Chart(quoteCtx, {
         type: 'doughnut',
         data: {
-            labels: ['신청 완료', '목표'],
+            labels: ['신청 완료', ''],
             datasets: [{
-                data: [data.quoteCount, Math.max(50 - data.quoteCount, 0)],
+                data: [data.quoteCount, Math.max(100 - data.quoteCount, 0)],
                 backgroundColor: ['#10b981', '#e5e7eb'],
                 borderWidth: 0
             }]
