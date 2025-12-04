@@ -14,7 +14,7 @@ const pages = {
 };
 
 // ===== 스프레드시트에서 데이터 로드 (JSONP 방식) =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzig2JN5ZCk25-AQdyecwllCWISir0e1ALULayfJuvRoymNOxt4sYOSYht2nDZchCi-/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9Vkgn6GOsPtAVhISXe8QzgqiFPLZOeeC3LXpU3B6utKCeu9HVQAFRaJYrWyMGL4Z4/exec';
 
 async function loadServiceData() {
     try {
@@ -360,15 +360,27 @@ async function loadStats() {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             
+            // 타임아웃 추가
+            const timeout = setTimeout(() => {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                console.error('❌ 통계 로드 타임아웃');
+                resolve(false); // reject 대신 resolve(false)
+            }, 10000); // 10초 타임아웃
+            
             window[callbackName] = function(data) {
+                clearTimeout(timeout); // 타임아웃 취소
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
                 }
                 
-                if (data.error) {
+                // 오류 체크
+                if (data && data.error) {
                     console.error('통계 로드 실패:', data.error);
-                    reject(false);
+                    resolve(false); // reject 대신 resolve(false)
                     return;
                 }
                 
@@ -379,12 +391,13 @@ async function loadStats() {
             
             script.src = `${APPS_SCRIPT_URL}?action=getStats&callback=${callbackName}`;
             script.onerror = function() {
+                clearTimeout(timeout); // 타임아웃 취소
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
                 }
-                console.error('❌ 통계 로드 실패');
-                reject(false);
+                console.error('❌ 통계 로드 실패 - 네트워크 오류');
+                resolve(false); // reject 대신 resolve(false)
             };
             
             document.body.appendChild(script);

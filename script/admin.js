@@ -3,7 +3,7 @@ let consultations = [];
 let filteredConsultations = [];
 let isAuthenticated = false;
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzig2JN5ZCk25-AQdyecwllCWISir0e1ALULayfJuvRoymNOxt4sYOSYht2nDZchCi-/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9Vkgn6GOsPtAVhISXe8QzgqiFPLZOeeC3LXpU3B6utKCeu9HVQAFRaJYrWyMGL4Z4/exec';
 
 // ===== 로그인 처리 (서버 검증) =====
 async function handleLogin() {
