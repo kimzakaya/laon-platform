@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>라온애드 - 광주 전남 소상공인 올인원 지원컨설팅 플랫폼</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -31,6 +32,44 @@
             </div>
         </div>
     </header>
+
+    <!-- ✅ Statistics Section 추가 -->
+    <section class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 접속 통계 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">오늘 방문자</h3>
+                    <div class="flex justify-center">
+                        <canvas id="visitChart" width="150" height="150"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-2xl font-bold text-blue-600" id="visitCount">0명</p>
+                </div>
+                
+                <!-- 견적 통계 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">총 견적 신청</h3>
+                    <div class="flex justify-center">
+                        <canvas id="quoteChart" width="150" height="150"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-2xl font-bold text-green-600" id="quoteCount">0건</p>
+                </div>
+                
+                <!-- 실시간 문의 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
+                        실시간 문의
+                    </h3>
+                    <div class="h-[180px] overflow-hidden relative">
+                        <div id="rollingList" class="space-y-3">
+                            <!-- 문의 리스트가 여기에 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

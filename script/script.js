@@ -3,6 +3,9 @@ let serviceData = {};
 let currentPage = 'home';
 let selectedIndustries = [];
 let selections = {};
+let visitChart = null;
+let quoteChart = null;
+
 
 const pages = {
     home: document.getElementById('homePage'),
@@ -343,6 +346,198 @@ window.addEventListener('DOMContentLoaded', async () => {
     const success = await loadServiceData();
     if (success) {
         // 로딩 화면 숨기기
+        document.getElementById('loadingScreen').style.display = 'none';
+        showPage('home');
+        console.log('✅ 초기화 완료!');
+    }
+});
+
+// ===== 통계 데이터 로드 =====
+async function loadStats() {
+    try {
+        const callbackName = 'statsCallback_' + Date.now();
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                
+                if (data.error) {
+                    console.error('통계 로드 실패:', data.error);
+                    reject(false);
+                    return;
+                }
+                
+                console.log('✅ 통계 데이터 로드 완료:', data);
+                updateStats(data);
+                resolve(true);
+            };
+            
+            script.src = `${APPS_SCRIPT_URL}?action=getStats&callback=${callbackName}`;
+            script.onerror = function() {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                console.error('❌ 통계 로드 실패');
+                reject(false);
+            };
+            
+            document.body.appendChild(script);
+        });
+    } catch (error) {
+        console.error('❌ 통계 로드 실패:', error);
+        return false;
+    }
+}
+
+// ===== 방문자 수 기록 =====
+async function recordVisit() {
+    try {
+        const callbackName = 'visitCallback_' + Date.now();
+        
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            
+            window[callbackName] = function(result) {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                resolve(result.success);
+            };
+            
+            script.src = `${APPS_SCRIPT_URL}?action=recordVisit&callback=${callbackName}`;
+            script.onerror = function() {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                resolve(false);
+            };
+            
+            document.body.appendChild(script);
+        });
+    } catch (error) {
+        console.error('방문 기록 실패:', error);
+        return false;
+    }
+}
+
+// ===== 통계 업데이트 (차트 & 롤링 리스트) =====
+function updateStats(data) {
+    // 방문자 수 업데이트
+    document.getElementById('visitCount').textContent = data.visitCount + '명';
+    
+    // 견적 수 업데이트
+    document.getElementById('quoteCount').textContent = data.quoteCount + '건';
+    
+    // 방문자 도넛 차트
+    const visitCtx = document.getElementById('visitChart').getContext('2d');
+    if (visitChart) visitChart.destroy();
+    visitChart = new Chart(visitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['오늘 방문', '목표'],
+            datasets: [{
+                data: [data.visitCount, Math.max(100 - data.visitCount, 0)],
+                backgroundColor: ['#3b82f6', '#e5e7eb'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            cutout: '70%'
+        }
+    });
+    
+    // 견적 도넛 차트
+    const quoteCtx = document.getElementById('quoteChart').getContext('2d');
+    if (quoteChart) quoteChart.destroy();
+    quoteChart = new Chart(quoteCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['신청 완료', '목표'],
+            datasets: [{
+                data: [data.quoteCount, Math.max(50 - data.quoteCount, 0)],
+                backgroundColor: ['#10b981', '#e5e7eb'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            cutout: '70%'
+        }
+    });
+    
+    // 실시간 문의 롤링 리스트
+    const rollingList = document.getElementById('rollingList');
+    rollingList.innerHTML = '';
+    
+    data.recentLogs.forEach((log, index) => {
+        const item = document.createElement('div');
+        item.className = 'rolling-item text-sm text-gray-700 py-2 px-3 bg-gray-50 rounded-lg';
+        item.style.animationDelay = `${index * 0.1}s`;
+        item.innerHTML = `
+            <span class="font-semibold">${log.name}</span> 님이 문의를 남기셨습니다.
+            <span class="text-gray-500 text-xs ml-2">${log.date}</span>
+        `;
+        rollingList.appendChild(item);
+    });
+    
+    // 롤링 애니메이션 시작
+    startRolling();
+}
+
+// ===== 롤링 애니메이션 =====
+function startRolling() {
+    const rollingList = document.getElementById('rollingList');
+    let currentScroll = 0;
+    
+    setInterval(() => {
+        currentScroll += 1;
+        if (currentScroll >= rollingList.scrollHeight / 2) {
+            currentScroll = 0;
+        }
+        rollingList.style.transform = `translateY(-${currentScroll}px)`;
+    }, 50);
+}
+
+// ===== 초기화 (기존 코드 수정) =====
+window.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 페이지 로딩 시작...');
+    
+    // 방문 기록
+    await recordVisit();
+    
+    // 통계 로드
+    await loadStats();
+    
+    // 서비스 데이터 로드
+    const success = await loadServiceData();
+    if (success) {
         document.getElementById('loadingScreen').style.display = 'none';
         showPage('home');
         console.log('✅ 초기화 완료!');
