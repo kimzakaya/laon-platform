@@ -4,22 +4,59 @@ let filteredConsultations = [];
 let isAuthenticated = false;
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzig2JN5ZCk25-AQdyecwllCWISir0e1ALULayfJuvRoymNOxt4sYOSYht2nDZchCi-/exec';
-const ADMIN_PASSWORD = 'laon2025!'; // 원하는 비밀번호로 변경하세요
 
-// ===== 로그인 처리 =====
-function handleLogin() {
+// ===== 로그인 처리 (서버 검증) =====
+async function handleLogin() {
     const password = document.getElementById('passwordInput').value;
     const errorMsg = document.getElementById('errorMsg');
+    const btn = document.getElementById('loginBtn');
     
-    if (password === ADMIN_PASSWORD) {
-        isAuthenticated = true;
-        errorMsg.classList.add('hidden');
-        showAdminScreen();
-        loadConsultations();
-    } else {
-        errorMsg.classList.remove('hidden');
-        document.getElementById('passwordInput').value = '';
-        document.getElementById('passwordInput').focus();
+    btn.disabled = true;
+    btn.textContent = '확인 중...';
+    
+    try {
+        const callbackName = 'loginCallback_' + Date.now();
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            
+            window[callbackName] = function(result) {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                
+                if (result.success) {
+                    isAuthenticated = true;
+                    errorMsg.classList.add('hidden');
+                    showAdminScreen();
+                    loadConsultations();
+                } else {
+                    errorMsg.classList.remove('hidden');
+                    document.getElementById('passwordInput').value = '';
+                    document.getElementById('passwordInput').focus();
+                    btn.disabled = false;
+                    btn.textContent = '로그인';
+                }
+            };
+            
+            script.src = `${APPS_SCRIPT_URL}?action=login&password=${encodeURIComponent(password)}&callback=${callbackName}`;
+            script.onerror = function() {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                alert('로그인 확인 중 오류가 발생했습니다.');
+                btn.disabled = false;
+                btn.textContent = '로그인';
+            };
+            
+            document.body.appendChild(script);
+        });
+    } catch (error) {
+        console.error('로그인 오류:', error);
+        btn.disabled = false;
+        btn.textContent = '로그인';
     }
 }
 
