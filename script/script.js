@@ -7,7 +7,6 @@ let totalVisitChart = null;
 let todayVisitChart = null;
 let quoteChart = null;
 
-
 const pages = {
     home: document.getElementById('homePage'),
     estimate: document.getElementById('estimatePage'),
@@ -15,18 +14,15 @@ const pages = {
 };
 
 // ===== 스프레드시트에서 데이터 로드 (JSONP 방식) =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxpqZwQKusKohR30Y0jxEQS_pzh-vgaAZM93UhmpppktimyZCQIE_n4XZL1mTbf1QzP/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBBejSggPc6Yh5i2PfqAJhIkvLXe1FKVd_o12eCIci8lQhzeM1HP18PJcbzo3rYDP8/exec';
 
 async function loadServiceData() {
     try {
-        // JSONP 방식으로 변경
         const callbackName = 'jsonpCallback_' + Date.now();
         
         return new Promise((resolve, reject) => {
-            // script 태그 먼저 생성
             const script = document.createElement('script');
             
-            // 콜백 함수 정의
             window[callbackName] = function(data) {
                 delete window[callbackName];
                 if (script.parentNode) {
@@ -37,7 +33,6 @@ async function loadServiceData() {
                 resolve(true);
             };
             
-            // script 태그 설정
             script.src = `${APPS_SCRIPT_URL}?action=getServiceData&callback=${callbackName}`;
             script.onerror = function() {
                 delete window[callbackName];
@@ -341,47 +336,47 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     }
 });
 
-// ===== 초기화 =====
-window.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 페이지 로딩 시작...');
-    const success = await loadServiceData();
-    if (success) {
-        // 로딩 화면 숨기기
-        document.getElementById('loadingScreen').style.display = 'none';
-        showPage('home');
-        console.log('✅ 초기화 완료!');
-    }
-});
-
 // ===== 통계 데이터 로드 =====
 async function loadStats() {
     try {
         const callbackName = 'statsCallback_' + Date.now();
         
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const script = document.createElement('script');
             
-            // 타임아웃 추가
             const timeout = setTimeout(() => {
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
                 }
                 console.error('❌ 통계 로드 타임아웃');
-                resolve(false); // reject 대신 resolve(false)
-            }, 10000); // 10초 타임아웃
+                // 타임아웃 시 기본값으로 표시
+                updateStats({
+                    totalVisitCount: 0,
+                    todayVisitCount: 0,
+                    quoteCount: 0,
+                    recentLogs: []
+                });
+                resolve(false);
+            }, 10000);
             
             window[callbackName] = function(data) {
-                clearTimeout(timeout); // 타임아웃 취소
+                clearTimeout(timeout);
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
                 }
                 
-                // 오류 체크
                 if (data && data.error) {
                     console.error('통계 로드 실패:', data.error);
-                    resolve(false); // reject 대신 resolve(false)
+                    // 에러 시 기본값으로 표시
+                    updateStats({
+                        totalVisitCount: 0,
+                        todayVisitCount: 0,
+                        quoteCount: 0,
+                        recentLogs: []
+                    });
+                    resolve(false);
                     return;
                 }
                 
@@ -390,15 +385,22 @@ async function loadStats() {
                 resolve(true);
             };
             
-            script.src = `${APPS_SCRIPT_URL}?action=getStats&callback=${callbackName}`;
+            script.src = `${APPS_SCRIPT_URL}?action=getStats&callback=${callbackName}&t=${Date.now()}`;
             script.onerror = function() {
-                clearTimeout(timeout); // 타임아웃 취소
+                clearTimeout(timeout);
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
                 }
                 console.error('❌ 통계 로드 실패 - 네트워크 오류');
-                resolve(false); // reject 대신 resolve(false)
+                // 에러 시 기본값으로 표시
+                updateStats({
+                    totalVisitCount: 0,
+                    todayVisitCount: 0,
+                    quoteCount: 0,
+                    recentLogs: []
+                });
+                resolve(false);
             };
             
             document.body.appendChild(script);
@@ -417,7 +419,16 @@ async function recordVisit() {
         return new Promise((resolve) => {
             const script = document.createElement('script');
             
+            const timeout = setTimeout(() => {
+                delete window[callbackName];
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+                resolve(false);
+            }, 5000);
+            
             window[callbackName] = function(result) {
+                clearTimeout(timeout);
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
@@ -425,8 +436,9 @@ async function recordVisit() {
                 resolve(result.success);
             };
             
-            script.src = `${APPS_SCRIPT_URL}?action=recordVisit&callback=${callbackName}`;
+            script.src = `${APPS_SCRIPT_URL}?action=recordVisit&callback=${callbackName}&t=${Date.now()}`;
             script.onerror = function() {
+                clearTimeout(timeout);
                 delete window[callbackName];
                 if (script.parentNode) {
                     script.parentNode.removeChild(script);
@@ -444,121 +456,153 @@ async function recordVisit() {
 
 // ===== 통계 업데이트 (차트 & 롤링 리스트) =====
 function updateStats(data) {
+    // ✅ 안전하게 값 가져오기 (undefined 방지)
+    const totalVisitCount = data.totalVisitCount || 0;
+    const todayVisitCount = data.todayVisitCount || 0;
+    const quoteCount = data.quoteCount || 0;
+    const recentLogs = data.recentLogs || [];
+    
+    console.log('📊 통계 업데이트:', {totalVisitCount, todayVisitCount, quoteCount});
+    
     // 누적 방문자 수 업데이트
-    document.getElementById('totalVisitCount').textContent = data.totalVisitCount + '명';
+    const totalVisitEl = document.getElementById('totalVisitCount');
+    if (totalVisitEl) {
+        totalVisitEl.textContent = totalVisitCount + '명';
+    }
     
     // 오늘 방문자 수 업데이트
-    document.getElementById('todayVisitCount').textContent = data.todayVisitCount + '명';
+    const todayVisitEl = document.getElementById('todayVisitCount');
+    if (todayVisitEl) {
+        todayVisitEl.textContent = todayVisitCount + '명';
+    }
     
     // 견적 수 업데이트
-    document.getElementById('quoteCount').textContent = data.quoteCount + '건';
+    const quoteCountEl = document.getElementById('quoteCount');
+    if (quoteCountEl) {
+        quoteCountEl.textContent = quoteCount + '건';
+    }
     
     // 누적 방문자 도넛 차트
-    const totalVisitCtx = document.getElementById('totalVisitChart').getContext('2d');
-    if (totalVisitChart) totalVisitChart.destroy();
-    totalVisitChart = new Chart(totalVisitCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['누적 방문', '목표'],
-            datasets: [{
-                data: [data.totalVisitCount, Math.max(1000 - data.totalVisitCount, 0)],
-                backgroundColor: ['#8b5cf6', '#e5e7eb'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true
-                }
+    const totalVisitCanvas = document.getElementById('totalVisitChart');
+    if (totalVisitCanvas) {
+        const totalVisitCtx = totalVisitCanvas.getContext('2d');
+        if (totalVisitChart) totalVisitChart.destroy();
+        totalVisitChart = new Chart(totalVisitCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['누적 방문', '목표'],
+                datasets: [{
+                    data: [totalVisitCount, Math.max(1000 - totalVisitCount, 0)],
+                    backgroundColor: ['#8b5cf6', '#e5e7eb'],
+                    borderWidth: 0
+                }]
             },
-            cutout: '70%'
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
     
     // 오늘 방문자 도넛 차트
-    const todayVisitCtx = document.getElementById('todayVisitChart').getContext('2d');
-    if (todayVisitChart) todayVisitChart.destroy();
-    todayVisitChart = new Chart(todayVisitCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['오늘 방문', '목표'],
-            datasets: [{
-                data: [data.todayVisitCount, Math.max(500 - data.todayVisitCount, 0)],
-                backgroundColor: ['#3b82f6', '#e5e7eb'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true
-                }
+    const todayVisitCanvas = document.getElementById('todayVisitChart');
+    if (todayVisitCanvas) {
+        const todayVisitCtx = todayVisitCanvas.getContext('2d');
+        if (todayVisitChart) todayVisitChart.destroy();
+        todayVisitChart = new Chart(todayVisitCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['오늘 방문', '목표'],
+                datasets: [{
+                    data: [todayVisitCount, Math.max(500 - todayVisitCount, 0)],
+                    backgroundColor: ['#3b82f6', '#e5e7eb'],
+                    borderWidth: 0
+                }]
             },
-            cutout: '70%'
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
     
     // 견적 도넛 차트
-    const quoteCtx = document.getElementById('quoteChart').getContext('2d');
-    if (quoteChart) quoteChart.destroy();
-    quoteChart = new Chart(quoteCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['신청 완료', '목표'],
-            datasets: [{
-                data: [data.quoteCount, Math.max(50 - data.quoteCount, 0)],
-                backgroundColor: ['#10b981', '#e5e7eb'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    enabled: true
-                }
+    const quoteCanvas = document.getElementById('quoteChart');
+    if (quoteCanvas) {
+        const quoteCtx = quoteCanvas.getContext('2d');
+        if (quoteChart) quoteChart.destroy();
+        quoteChart = new Chart(quoteCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['신청 완료', '목표'],
+                datasets: [{
+                    data: [quoteCount, Math.max(50 - quoteCount, 0)],
+                    backgroundColor: ['#10b981', '#e5e7eb'],
+                    borderWidth: 0
+                }]
             },
-            cutout: '70%'
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
     
     // 실시간 문의 롤링 리스트
     const rollingList = document.getElementById('rollingList');
-    rollingList.innerHTML = '';
-    
-    data.recentLogs.forEach((log, index) => {
-        const item = document.createElement('div');
-        item.className = 'rolling-item text-sm text-gray-700 py-2 px-4 bg-gray-50 rounded-lg';
-        item.style.animationDelay = `${index * 0.1}s`;
-        item.innerHTML = `
-            <span class="font-semibold">${log.name}</span> 님이 문의를 남기셨습니다.
-            <span class="text-gray-500 text-xs ml-2">${log.date}</span>
-        `;
-        rollingList.appendChild(item);
-    });
-    
-    // 롤링 애니메이션 시작
-    startRolling();
+    if (rollingList) {
+        rollingList.innerHTML = '';
+        
+        recentLogs.forEach((log, index) => {
+            const item = document.createElement('div');
+            item.className = 'rolling-item text-sm text-gray-700 py-2 px-4 bg-gray-50 rounded-lg';
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.innerHTML = `
+                <span class="font-semibold">${log.name}</span> 님이 문의를 남기셨습니다.
+                <span class="text-gray-500 text-xs ml-2">${log.date}</span>
+            `;
+            rollingList.appendChild(item);
+        });
+        
+        // 롤링 애니메이션 시작
+        if (recentLogs.length > 0) {
+            startRolling();
+        }
+    }
 }
 
 // ===== 롤링 애니메이션 =====
 function startRolling() {
     const rollingList = document.getElementById('rollingList');
+    if (!rollingList) return;
+    
     let currentScroll = 0;
     
     setInterval(() => {
@@ -570,7 +614,7 @@ function startRolling() {
     }, 50);
 }
 
-// ===== 초기화 (기존 코드 수정) =====
+// ===== 초기화 =====
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 페이지 로딩 시작...');
     

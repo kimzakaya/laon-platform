@@ -33,61 +33,63 @@
         </div>
     </header>
 
-<!-- ✅ Statistics Section 수정 -->
+<!-- ✅ Statistics Section 수정 (순서 조정) -->
 <section class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- 모바일: 실시간 문의가 맨 위 / 데스크톱: 도넛 차트가 위 -->
-        
-        <!-- 실시간 문의 (모바일 1번째, 데스크톱 2번째) -->
-        <div class="bg-white rounded-xl shadow-md p-6 fade-in mb-8 order-1 lg:order-2">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center">
-                <span class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
-                실시간 문의
-            </h3>
-            <div class="h-[120px] overflow-hidden relative">
-                <div id="rollingList" class="space-y-2 text-center">
-                    <!-- 문의 리스트가 여기에 동적으로 추가됩니다 -->
+        <!-- Flexbox로 순서 제어 -->
+        <div class="flex flex-col lg:flex-col gap-8">
+            
+            <!-- 실시간 문의 (모바일 1번째, 데스크톱 2번째) -->
+            <div class="bg-white rounded-xl shadow-md p-6 fade-in order-1 lg:order-2">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center">
+                    <span class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
+                    실시간 문의
+                </h3>
+                <div class="h-[120px] overflow-hidden relative">
+                    <div id="rollingList" class="space-y-2 text-center">
+                        <!-- 문의 리스트가 여기에 동적으로 추가됩니다 -->
+                    </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- 도넛 차트 3개 (모바일 4번째, 데스크톱 1번째) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 order-4 lg:order-1">
-            <!-- 누적 방문자 -->
-            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">누적 방문자</h3>
-                <div class="flex justify-center">
-                    <canvas id="totalVisitChart" width="150" height="150"></canvas>
-                </div>
-                <p class="text-center mt-4 text-2xl font-bold text-purple-600" id="totalVisitCount">0명</p>
-                <p class="text-center text-sm text-gray-500 mt-1">목표 1,000명</p>
             </div>
             
-            <!-- 일일 방문자 -->
-            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">오늘 방문자</h3>
-                <div class="flex justify-center">
-                    <canvas id="todayVisitChart" width="150" height="150"></canvas>
+            <!-- 도넛 차트 3개 (모바일 4번째, 데스크톱 1번째) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 order-4 lg:order-1">
+                <!-- 누적 방문자 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">누적 방문자</h3>
+                    <div class="flex justify-center">
+                        <canvas id="totalVisitChart" width="150" height="150"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-2xl font-bold text-purple-600" id="totalVisitCount">0명</p>
+                    <p class="text-center text-sm text-gray-500 mt-1">목표 1,000명</p>
                 </div>
-                <p class="text-center mt-4 text-2xl font-bold text-blue-600" id="todayVisitCount">0명</p>
-                <p class="text-center text-sm text-gray-500 mt-1">목표 500명</p>
-            </div>
-            
-            <!-- 견적 신청 -->
-            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">총 견적 신청</h3>
-                <div class="flex justify-center">
-                    <canvas id="quoteChart" width="150" height="150"></canvas>
+                
+                <!-- 일일 방문자 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">오늘 방문자</h3>
+                    <div class="flex justify-center">
+                        <canvas id="todayVisitChart" width="150" height="150"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-2xl font-bold text-blue-600" id="todayVisitCount">0명</p>
+                    <p class="text-center text-sm text-gray-500 mt-1">목표 500명</p>
                 </div>
-                <p class="text-center mt-4 text-2xl font-bold text-green-600" id="quoteCount">0건</p>
-                <p class="text-center text-sm text-gray-500 mt-1">목표 50건</p>
+                
+                <!-- 견적 신청 -->
+                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">총 견적 신청</h3>
+                    <div class="flex justify-center">
+                        <canvas id="quoteChart" width="150" height="150"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-2xl font-bold text-green-600" id="quoteCount">0건</p>
+                    <p class="text-center text-sm text-gray-500 mt-1">목표 50건</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Content (모바일 2번째, 데스크톱 3번째) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 order-2 lg:order-3">
         <!-- Home Page -->
         <div id="homePage">
             <div class="text-center mb-12 fade-in">
@@ -284,8 +286,8 @@
         </div>
     </main>
 
- <!-- ✅ 협업 업체 로고 (Footer 바로 위) -->
-    <section class="bg-white border-t border-gray-200 py-12">
+ <!-- ✅ 협업 업체 로고 (Footer 바로 위) (모바일 3번째, 데스크톱 4번째) -->
+    <section class="bg-white border-t border-gray-200 py-12 order-3 lg:order-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h3 class="text-2xl font-bold text-gray-800 mb-8 text-center">함께하는 파트너</h3>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
