@@ -230,3 +230,11 @@ body {
 .animate-spin {
     animation: spin 1s linear infinite;
 }
+
+/* 모바일 순서 조정 */
+@media (max-width: 1023px) {
+    section > div {
+        display: flex;
+        flex-direction: column;
+    }
+}
