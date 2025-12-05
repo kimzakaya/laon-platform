@@ -14,7 +14,7 @@ const pages = {
 };
 
 // ===== 스프레드시트에서 데이터 로드 (JSONP 방식) =====
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBBejSggPc6Yh5i2PfqAJhIkvLXe1FKVd_o12eCIci8lQhzeM1HP18PJcbzo3rYDP8/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqFx0ahHPLPgrtQSnA-pwxIf2kvSF_L7bPiGfxyHu654EkOz7lkWJGNWv2LYerayuU/exec';
 
 async function loadServiceData() {
     try {
