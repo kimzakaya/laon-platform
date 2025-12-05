@@ -3,7 +3,8 @@ let serviceData = {};
 let currentPage = 'home';
 let selectedIndustries = [];
 let selections = {};
-let visitChart = null;
+let totalVisitChart = null;
+let todayVisitChart = null;
 let quoteChart = null;
 
 
@@ -443,21 +444,52 @@ async function recordVisit() {
 
 // ===== 통계 업데이트 (차트 & 롤링 리스트) =====
 function updateStats(data) {
-    // 방문자 수 업데이트
-    document.getElementById('visitCount').textContent = data.visitCount + '명';
+    // 누적 방문자 수 업데이트
+    document.getElementById('totalVisitCount').textContent = data.totalVisitCount + '명';
+    
+    // 오늘 방문자 수 업데이트
+    document.getElementById('todayVisitCount').textContent = data.todayVisitCount + '명';
     
     // 견적 수 업데이트
     document.getElementById('quoteCount').textContent = data.quoteCount + '건';
     
-    // 방문자 도넛 차트
-    const visitCtx = document.getElementById('visitChart').getContext('2d');
-    if (visitChart) visitChart.destroy();
-    visitChart = new Chart(visitCtx, {
+    // 누적 방문자 도넛 차트
+    const totalVisitCtx = document.getElementById('totalVisitChart').getContext('2d');
+    if (totalVisitChart) totalVisitChart.destroy();
+    totalVisitChart = new Chart(totalVisitCtx, {
         type: 'doughnut',
         data: {
-            labels: ['누적 방문자 수', ''],
+            labels: ['누적 방문', '목표'],
             datasets: [{
-                data: [data.visitCount, Math.max(200 - data.visitCount, 0)],
+                data: [data.totalVisitCount, Math.max(1000 - data.totalVisitCount, 0)],
+                backgroundColor: ['#8b5cf6', '#e5e7eb'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            cutout: '70%'
+        }
+    });
+    
+    // 오늘 방문자 도넛 차트
+    const todayVisitCtx = document.getElementById('todayVisitChart').getContext('2d');
+    if (todayVisitChart) todayVisitChart.destroy();
+    todayVisitChart = new Chart(todayVisitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['오늘 방문', '목표'],
+            datasets: [{
+                data: [data.todayVisitCount, Math.max(500 - data.todayVisitCount, 0)],
                 backgroundColor: ['#3b82f6', '#e5e7eb'],
                 borderWidth: 0
             }]
@@ -483,9 +515,9 @@ function updateStats(data) {
     quoteChart = new Chart(quoteCtx, {
         type: 'doughnut',
         data: {
-            labels: ['신청 완료', ''],
+            labels: ['신청 완료', '목표'],
             datasets: [{
-                data: [data.quoteCount, Math.max(100 - data.quoteCount, 0)],
+                data: [data.quoteCount, Math.max(50 - data.quoteCount, 0)],
                 backgroundColor: ['#10b981', '#e5e7eb'],
                 borderWidth: 0
             }]
@@ -511,7 +543,7 @@ function updateStats(data) {
     
     data.recentLogs.forEach((log, index) => {
         const item = document.createElement('div');
-        item.className = 'rolling-item text-sm text-gray-700 py-2 px-3 bg-gray-50 rounded-lg';
+        item.className = 'rolling-item text-sm text-gray-700 py-2 px-4 bg-gray-50 rounded-lg';
         item.style.animationDelay = `${index * 0.1}s`;
         item.innerHTML = `
             <span class="font-semibold">${log.name}</span> 님이 문의를 남기셨습니다.

@@ -33,43 +33,93 @@
         </div>
     </header>
 
-    <!-- ✅ Statistics Section 추가 -->
-    <section class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- 접속 통계 -->
-                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">라온 플랫폼을 방문해주신 분들</h3>
-                    <div class="flex justify-center">
-                        <canvas id="visitChart" width="150" height="150"></canvas>
-                    </div>
-                    <p class="text-center mt-4 text-2xl font-bold text-blue-600" id="visitCount">0명</p>
+<!-- ✅ Statistics Section 교체 -->
+<section class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- 도넛 차트 3개 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 누적 방문자 -->
+            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">누적 방문자</h3>
+                <div class="flex justify-center">
+                    <canvas id="totalVisitChart" width="150" height="150"></canvas>
                 </div>
-                
-                <!-- 견적 통계 -->
-                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">총 견적 신청</h3>
-                    <div class="flex justify-center">
-                        <canvas id="quoteChart" width="150" height="150"></canvas>
-                    </div>
-                    <p class="text-center mt-4 text-2xl font-bold text-green-600" id="quoteCount">0건</p>
+                <p class="text-center mt-4 text-2xl font-bold text-purple-600" id="totalVisitCount">0명</p>
+                <p class="text-center text-sm text-gray-500 mt-1">목표 1,000명</p>
+            </div>
+            
+            <!-- 일일 방문자 -->
+            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">오늘 방문자</h3>
+                <div class="flex justify-center">
+                    <canvas id="todayVisitChart" width="150" height="150"></canvas>
                 </div>
-                
-                <!-- 실시간 문의 -->
-                <div class="bg-white rounded-xl shadow-md p-6 fade-in">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
-                        실시간 문의
-                    </h3>
-                    <div class="h-[180px] overflow-hidden relative">
-                        <div id="rollingList" class="space-y-3">
-                            <!-- 문의 리스트가 여기에 동적으로 추가됩니다 -->
-                        </div>
-                    </div>
+                <p class="text-center mt-4 text-2xl font-bold text-blue-600" id="todayVisitCount">0명</p>
+                <p class="text-center text-sm text-gray-500 mt-1">목표 500명</p>
+            </div>
+            
+            <!-- 견적 신청 -->
+            <div class="bg-white rounded-xl shadow-md p-6 fade-in">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">총 견적 신청</h3>
+                <div class="flex justify-center">
+                    <canvas id="quoteChart" width="150" height="150"></canvas>
+                </div>
+                <p class="text-center mt-4 text-2xl font-bold text-green-600" id="quoteCount">0건</p>
+                <p class="text-center text-sm text-gray-500 mt-1">목표 50건</p>
+            </div>
+        </div>
+        
+        <!-- 실시간 문의 (가로로 길게) -->
+        <div class="bg-white rounded-xl shadow-md p-6 fade-in mb-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <span class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></span>
+                실시간 문의
+            </h3>
+            <div class="h-[120px] overflow-hidden relative">
+                <div id="rollingList" class="space-y-2">
+                    <!-- 문의 리스트가 여기에 동적으로 추가됩니다 -->
                 </div>
             </div>
         </div>
-    </section>
+        
+        <!-- 협업 업체 로고 -->
+        <div class="bg-white rounded-xl shadow-md p-8 fade-in">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">함께하는 파트너</h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+1" alt="파트너 1" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+2" alt="파트너 2" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+3" alt="파트너 3" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+4" alt="파트너 4" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+5" alt="파트너 5" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+6" alt="파트너 6" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+7" alt="파트너 7" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+8" alt="파트너 8" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+9" alt="파트너 9" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg hover:shadow-md transition-all">
+                    <img src="https://via.placeholder.com/150x80?text=Partner+10" alt="파트너 10" class="max-h-16 opacity-70 hover:opacity-100 transition-opacity">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
