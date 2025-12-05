@@ -585,7 +585,9 @@ function updateStats(data) {
             item.className = 'rolling-item text-sm text-gray-700 py-2 px-4 bg-gray-50 rounded-lg';
             item.style.animationDelay = `${index * 0.1}s`;
             item.innerHTML = `
-                <span class="font-semibold">${log.name}</span> 님이 문의를 남기셨습니다.
+                <span class="font-semibold text-blue-600">${log.name}</span> 님 
+                <span class="text-gray-600">(${log.business})</span>이 
+                <span class="font-semibold">견적 신청</span>을 하셨습니다.
                 <span class="text-gray-500 text-xs ml-2">${log.date}</span>
             `;
             rollingList.appendChild(item);
